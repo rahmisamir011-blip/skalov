@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Hindo! 💖</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ec4899; /* Pink */
+            --secondary: #8b5cf6; /* Purple */
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0f0510; /* Very dark pink/purple background */
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            perspective: 1000px;
+        }
+
+        .script-font {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        /* --- HEART BACKGROUND --- */
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .heart-particle {
+            position: absolute;
+            opacity: 0;
+            animation: floatHeart var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+            will-change: transform, opacity;
+            font-size: var(--size);
+            color: var(--color);
+            text-shadow: 0 0 5px rgba(236, 72, 153, 0.5);
+        }
+
+        @keyframes floatHeart {
+            0% { opacity: 0; transform: translateY(100vh) scale(0.5); }
+            20% { opacity: 0.8; }
+            80% { opacity: 0.8; }
+            100% { opacity: 0; transform: translateY(-10vh) scale(1.2) rotate(360deg); }
+        }
+
+        /* --- GLOWING ORB (INTRO) --- */
+        .orb-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            text-align: center;
+            transition: all 0.8s ease;
+        }
+
+        .orb {
+            width: 140px;
+            height: 140px;
+            /* Heart Shape using CSS or just a large Emoji */
+            font-size: 80px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            animation: pulseHeart 1.5s infinite alternate;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 20px var(--primary));
+        }
+
+        .orb:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 40px var(--primary));
+        }
+
+        .orb::after {
+            content: 'Tap the Heart';
+            position: absolute;
+            font-size: 1rem;
+            bottom: -30px;
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+        }
+
+        @keyframes pulseHeart {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* --- MAIN CARD --- */
+        .card-wrapper {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            border-radius: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(0) rotateY(0);
+            will-change: transform;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #f9a8d4, #e879f9, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: white;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .photo-frame {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ec4899, #8b5cf6);
+            padding: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .photo-placeholder {
+            width: 100%;
+            height: 100%;
+            background-color: #1f1f2e;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Heart Background -->
+    <div id="hearts-container" class="hearts-bg"></div>
+
+    <!-- Intro: Glowing Heart Orb -->
+    <div class="orb-container" id="intro">
+        <div class="orb" onclick="startCelebration()">💖</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="card-wrapper" id="celebration">
+        <div class="glass-card" id="tilt-card">
+            
+            <div class="photo-frame">
+                <div class="photo-placeholder">👸</div>
+            </div>
+
+            <h1 class="text-5xl md:text-7xl mb-4 script-font text-pink-400">Happy Birthday</h1>
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-8 tracking-wide">HINDO</h2>
+
+            <div class="bg-pink-900/20 rounded-xl p-6 border border-pink-500/20 shadow-inner min-h-[120px] flex items-center justify-center">
+                <p id="typewriter-text" class="text-lg md:text-xl text-pink-100 leading-relaxed font-light italic">
+                    <!-- Text inserted via JS -->
+                </p>
+                <span class="cursor"></span>
+            </div>
+
+            <div class="mt-8 flex justify-center gap-4">
+                <button onclick="fireConfetti()" class="px-8 py-3 rounded-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold shadow-lg transition transform hover:scale-105">
+                    Send Love 💖
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Optimized Heart Background ---
+        const heartsContainer = document.getElementById('hearts-container');
+        const heartCount = 60; // Total hearts on screen
+        const heartTypes = ['❤️', '💖', '💗', '💓', '💕'];
+        const colors = ['#ff7675', '#e84393', '#fd79a8', '#ffcccc'];
+
+        const fragment = document.createDocumentFragment();
+        
+        for (let i = 0; i < heartCount; i++) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            
+            // Randomly select a heart emoji
+            heart.innerText = heartTypes[Math.floor(Math.random() * heartTypes.length)];
+            
+            // Random properties
+            const left = Math.random() * 100;
+            const duration = Math.random() * 15 + 10 + 's'; // Slow floating (10-25s)
+            const delay = Math.random() * 20 + 's';
+            const size = Math.random() * 20 + 10 + 'px'; // Size between 10px and 30px
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            heart.style.left = left + '%';
+            heart.style.setProperty('--duration', duration);
+            heart.style.setProperty('--delay', delay);
+            heart.style.setProperty('--size', size);
+            heart.style.setProperty('--color', color);
+
+            fragment.appendChild(heart);
+        }
+        heartsContainer.appendChild(fragment);
+
+        // --- 2. Transition Logic ---
+        function startCelebration() {
+            const intro = document.getElementById('intro');
+            const celebration = document.getElementById('celebration');
+            
+            intro.style.transform = 'translate(-50%, -50%) scale(0)';
+            intro.style.opacity = '0';
+
+            setTimeout(() => {
+                intro.style.display = 'none';
+                celebration.style.display = 'flex';
+                
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        celebration.style.opacity = '1';
+                        fireConfetti();
+                        typeWriter();
+                    }, 50);
+                });
+            }, 500);
+        }
+
+        // --- 3. Heart Confetti ---
+        function fireConfetti() {
+            const count = 200;
+            const defaults = { origin: { y: 0.7 } };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio),
+                    shapes: ['circle', 'square'], // Canvas confetti default shapes (hearts require SVG shape mapping, simplifying for speed)
+                    colors: ['#ff0000', '#ff69b4', '#ff1493']
+                }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+        }
+
+        // --- 4. Typewriter ---
+        const message = "Sending you a sky full of hearts for your special day. You are loved more than all the stars in the galaxy. Happy Birthday Hindo! ❤️";
+        const typeWriterElement = document.getElementById('typewriter-text');
+        let i = 0;
+
+        function typeWriter() {
+            if (i < message.length) {
+                typeWriterElement.innerHTML += message.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            } else {
+                document.querySelector('.cursor').style.display = 'none';
+            }
+        }
+
+        // --- 5. Optimized 3D Tilt (Throttled) ---
+        const card = document.getElementById('tilt-card');
+        const container = document.getElementById('celebration');
+        let isMoving = false;
+
+        container.addEventListener('mousemove', (e) => {
+            if (isMoving) return;
+            
+            isMoving = true;
+            requestAnimationFrame(() => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                
+                isMoving = false;
+            });
+        });
+
+        container.addEventListener('mouseleave', () => {
+            card.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
+        });
+
+    </script>
+</body>
+</html>
+
